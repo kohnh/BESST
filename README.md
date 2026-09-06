@@ -86,6 +86,14 @@ $env:BESST_DEMO = "1"
 uv run python app.py
 ```
 
+`$env:` variables last for the whole PowerShell session, not just the next command, and `BESST_DEMO` is what switches the ingester off. So clear them before running anything else in that window, or the app will keep serving the frozen snapshot with no ingest and the data-age badge will climb forever:
+
+```powershell
+Remove-Item Env:BESST_DB, Env:BESST_DEMO -ErrorAction SilentlyContinue
+```
+
+A fresh terminal does the same thing. On macOS and Linux this does not arise, because the Makefile sets both for one command only.
+
 *Option B, live data from nemweb.* This is `make setup`: it fills `data\nem.sqlite` with about ten recent days, takes 5 to 10 minutes, and then serves. Go and grab a cup of coffee.
 
 ```powershell
@@ -97,7 +105,7 @@ uv run python app.py
 
 Compute those dates rather than pasting fixed ones. Predispatch lives in nemweb's Current folder for only about 15 days, so a range written down today stops being fetchable in a fortnight and the ingest fails with a `LookupError`. This is the same reason the Makefile derives `FROM` and `TO` from today.
 
-After Option B the store persists, so `uv run python app.py` on its own is all you need next time.
+After Option B the store persists, so `uv run python app.py` on its own is all you need next time, in a window where `BESST_DEMO` is not set. When the ingester is running you will see lines like `[DISPATCHIS] 1/1 PUBLIC_DISPATCHIS_....zip +5` in the console every five minutes, and the data-age badge in the top right stays under ten minutes. If it climbs past that, check `$env:BESST_DEMO` first and the console for `poll failed` second.
 
 Either way the server holds the terminal and prints the URL it chose. Stop it with Ctrl-C. The rest of the targets:
 
