@@ -2,6 +2,10 @@
 
 A 200 MWh grid battery in the NSW1 region of the Australian National Electricity Market. The tool ingests AEMO's five-minute dispatch prices and price forecasts, decides when to charge and discharge, and shows a trader why.
 
+![The BESST Dashboard Live tab, showing spot price, the AEMO forecast, the battery's plan and its state of charge](docs/live-tab.png)
+
+The Live tab. Spot price top left, the plan's next action and thresholds below it, and on the right today's actual prices in white running into AEMO's dashed forecast, with the plan as a tape under the chart and state of charge in the lower panel. Shown in dark mode with the sidebar's "Green sells" option, which swaps the default trade colours, so here green is discharging and orange is charging.
+
 ---
 
 ## What this dashboard is for
