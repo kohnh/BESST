@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# `make up-bg`
+app.log
+.app.pid
+
+# the live store (`make setup` backfills it) and the scratch copy `make demo` runs on.
+# data/snapshot.sqlite is committed on purpose.
+data/nem.sqlite
+data/demo.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm

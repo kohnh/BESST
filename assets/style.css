@@ -1,0 +1,159 @@
+/* BESST Dashboard — neumorphic ground, glass top bar, one blue, one orange, one green. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap');
+
+:root {
+  --bg: #eef0f5; --ink: #1f2330; --muted: #5c6377; --line: #dfe2ea;
+  --blue: #4a66d2; --hot: #c8552a; --cool: #1f8f6e; --ctx: #9298aa;
+  --sh-d: #cdd1db; --sh-l: #ffffff;
+  --glass: rgba(255, 255, 255, .55); --glass-b: rgba(255, 255, 255, .75);
+  --chg: var(--cool); --dis: var(--hot);          /* charging/buying, discharging/selling */
+}
+.swap { --chg: var(--hot); --dis: var(--cool); }  /* settings: "Green sells" */
+.chg { color: var(--chg); } .dis { color: var(--dis); }
+[data-mantine-color-scheme="dark"] {
+  --bg: #20232b; --ink: #eceef4; --muted: #9aa0b2; --line: #33374a;
+  --blue: #6f89e6; --hot: #d9683a; --cool: #25a27a; --ctx: #4a4f5c;
+  --sh-d: #15171c; --sh-l: #2b3039;
+  --glass: rgba(38, 42, 52, .55); --glass-b: rgba(255, 255, 255, .08);
+}
+
+html, body { background: var(--bg) !important; color: var(--ink); font-family: Manrope, system-ui, sans-serif; }
+[hidden] { display: none !important; }   /* .grid/.stack display beats the UA [hidden] rule, so the view toggle did nothing */
+.page { max-width: 1540px; margin: 0 auto; padding: 18px 24px 48px; }
+
+/* surfaces */
+.neu { background: var(--bg); border-radius: 26px; padding: 22px 24px;
+       box-shadow: 10px 10px 24px var(--sh-d), -10px -10px 24px var(--sh-l); }
+.neu-in { background: var(--bg); border-radius: 18px;
+          box-shadow: inset 5px 5px 10px var(--sh-d), inset -5px -5px 10px var(--sh-l); }
+.glass { background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+         border: 1px solid var(--glass-b); border-radius: 26px;
+         box-shadow: 6px 6px 18px var(--sh-d), -6px -6px 18px var(--sh-l); }
+
+/* top bar */
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; padding: 12px 20px; margin-bottom: 22px;
+          position: relative; z-index: 50; }   /* the settings panel drops over the cards below */
+.topbar > * { flex-shrink: 0; }
+.brand { display: flex; align-items: center; gap: 14px; font-weight: 800; font-size: 20px; letter-spacing: -.01em; white-space: nowrap; }
+.brand .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--blue); }
+.spacer { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 9px; padding: 9px 16px; border-radius: 999px;
+        font-weight: 700; font-size: 13px; }
+.pill .dot { width: 9px; height: 9px; border-radius: 50%; }
+.pill .num { font-variant-numeric: tabular-nums; display: inline-block; min-width: 7ch; text-align: right; }
+.pill.ok .dot { background: var(--cool); } .pill.warn .dot { background: var(--hot); }
+.pill.warn { color: var(--hot); }
+/* settings popover */
+.set { position: relative; }
+.gear { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; cursor: pointer;
+        border-radius: 50%; font-size: 17px; color: var(--muted); list-style: none;
+        box-shadow: 4px 4px 10px var(--sh-d), -4px -4px 10px var(--sh-l); }
+.gear::-webkit-details-marker { display: none; } .gear::marker { content: ""; }
+.gear:hover { color: var(--blue); }
+.set[open] > .gear { color: var(--blue); box-shadow: inset 4px 4px 8px var(--sh-d), inset -4px -4px 8px var(--sh-l); }
+.set-backdrop { display: none; position: fixed; inset: 0; z-index: 30;
+                backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.page:has(details.set[open]) .set-backdrop { display: block; }
+.set-panel { position: absolute; right: -20px;   /* the topbar's own padding, so the panel lines up with the card edge */
+             top: calc(100% + 14px); z-index: 40; width: 344px; padding: 16px 18px; border-radius: 22px; }
+.row.set-row { gap: 10px; flex-wrap: nowrap; }
+.set-row + .set-row { margin-top: 14px; }
+
+/* type */
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.hero { font-size: 60px; font-weight: 800; letter-spacing: -.045em; line-height: 1; margin: 10px 0 8px;
+        font-variant-numeric: tabular-nums; }
+.sub { color: var(--muted); font-size: 14px; font-weight: 600; }
+.sub b { font-weight: 800; }
+h3.card-title { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.hot { color: var(--hot); } .cool { color: var(--cool); } .blue { color: var(--blue); } .muted { color: var(--muted); }
+
+/* layout */
+.grid { display: grid; grid-template-columns: minmax(340px, 380px) 1fr; gap: 22px; align-items: start; }
+.grid > * { min-width: 0; }            /* without this the plot's own width becomes the column floor and the page overflows */
+.dash-graph { overflow: hidden; }      /* plotly leaves stale svg wider than its box for a beat after a resize */
+/* The plan tape is one rect per run; a 5-minute run is ~2px wide, which is all antialiased edge and no solid
+   interior, so narrow blocks render paler and read as shorter than long ones even though every rect is the same
+   height to three decimals. crispEdges snaps them to whole pixels. Only shapes here are the tape and the vertical
+   "now" line, both axis-aligned, so nothing loses smoothing it needed. */
+.js-plotly-plot .shapelayer path { shape-rendering: crispEdges; }
+.stack { display: flex; flex-direction: column; gap: 22px; }
+.row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+.tile { padding: 16px 18px; }
+.tile .v { font-size: 30px; font-weight: 800; letter-spacing: -.03em; margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 12px; color: var(--muted); font-weight: 600; }
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-top: 12px; }
+
+/* Left panel type scales with viewport height so the whole spot card fits without scrolling.
+   Clamps top out at the desktop sizes, so a tall screen looks exactly as before. */
+.spot-card .spot-label { margin-top: clamp(8px, 2.4vh, 22px); }
+.spot-card .hero { font-size: clamp(30px, 6.8vh, 60px); margin: clamp(4px, 1vh, 10px) 0 clamp(4px, .8vh, 8px); }
+.spot-card .sub { font-size: clamp(12px, 1.5vh, 14px); }
+.spot-card .tiles { gap: clamp(9px, 1.7vh, 16px); margin-top: clamp(10px, 2.4vh, 22px); }
+.spot-card .tile { padding: clamp(10px, 1.7vh, 16px) clamp(12px, 2vh, 18px); }
+.spot-card .tile .v { font-size: clamp(16px, 3.4vh, 30px); margin: clamp(2px, .6vh, 6px) 0 2px; }
+.spot-card .tile .s { font-size: clamp(10px, 1.3vh, 12px); }
+
+/* static legend: names what is drawn, never clickable */
+.legend { display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; font-weight: 600; color: var(--muted); margin: 10px 0 2px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { display: inline-block; width: 24px; height: 3px; border-radius: 2px; }
+.sw.dash { background: repeating-linear-gradient(90deg, var(--blue) 0 6px, transparent 6px 10px); }
+.sw.dot { background: repeating-linear-gradient(90deg, var(--ctx) 0 3px, transparent 3px 6px); }
+.sw.box { width: 18px; height: 12px; border-radius: 4px; }
+
+/* Mantine controls pressed into the surface */
+.mantine-SegmentedControl-root { background: var(--bg); border-radius: 16px; padding: 4px;
+  box-shadow: inset 4px 4px 8px var(--sh-d), inset -4px -4px 8px var(--sh-l); }
+.mantine-SegmentedControl-indicator { background: var(--bg); border-radius: 12px;
+  box-shadow: 4px 4px 10px var(--sh-d), -4px -4px 10px var(--sh-l); }
+.mantine-SegmentedControl-label { font-weight: 700; color: var(--muted); }
+.mantine-SegmentedControl-label[data-active] { color: var(--blue); }
+.mantine-Chip-label { background: var(--bg) !important; border: 0 !important; font-weight: 700; color: var(--muted);
+  box-shadow: 4px 4px 10px var(--sh-d), -4px -4px 10px var(--sh-l); }
+.mantine-Chip-label[data-checked] { color: var(--blue);
+  box-shadow: inset 4px 4px 8px var(--sh-d), inset -4px -4px 8px var(--sh-l); }
+.mantine-NumberInput-input, .mantine-DatePicker-input, .mantine-DateInput-input, .mantine-Input-input {
+  background: var(--bg) !important; border: 0 !important; border-radius: 14px; font-weight: 700; color: var(--ink);
+  box-shadow: inset 4px 4px 8px var(--sh-d), inset -4px -4px 8px var(--sh-l); }
+.mantine-NumberInput-label, .mantine-DatePicker-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+.mantine-Table-table { font-variant-numeric: tabular-nums; }
+.mantine-Table-th { color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; }
+.mantine-Table-td { color: var(--ink); }
+.mantine-Switch-track { box-shadow: inset 3px 3px 6px var(--sh-d), inset -3px -3px 6px var(--sh-l); border: 0; }
+.mantine-Switch-trackLabel { font-size: 14px; }   /* mantine sizes the sun/moon glyph off the thumb: 7px */
+
+/* Loading skeletons. Anything the callback has not filled in yet shimmers, so a refresh
+   never shows a blank tile or plotly's stock empty axes. */
+@keyframes skel { to { background-position: -200% 0; } }
+.skel, #spot:empty, #spot-s:empty, #age-pill:empty, #bt-title:empty,
+.tile .v:empty, .tile .s:empty, #live-table:empty, #day-table:empty, #worst-table:empty {
+  display: block; color: transparent; border-radius: 10px;
+  background-image: linear-gradient(90deg, var(--sh-d) 24%, var(--bg) 50%, var(--sh-d) 76%);
+  background-size: 200% 100%; background-position: 200% 0;
+  animation: skel 1.5s linear infinite;
+}
+.skel { width: 100%; }
+.skel-wrap { position: relative; }   /* dcc.Loading absolutely positions its spinner; without this it lands over the card header */
+@media (prefers-reduced-motion: reduce) { .skel, *:empty { animation: none; } }
+#spot:empty { height: clamp(30px, 6.8vh, 60px); width: 62%; margin: clamp(4px, 1vh, 10px) 0 clamp(4px, .8vh, 8px); }
+#spot-s:empty { height: 13px; width: 76%; }
+.tile .v:empty { height: clamp(16px, 3.4vh, 30px); margin: clamp(2px, .6vh, 6px) 0 2px; }
+.tile .s:empty { height: 10px; width: 68%; }
+#live-table:empty, #day-table:empty, #worst-table:empty { height: 150px; }
+#bt-title:empty { height: 24px; width: 260px; }
+#age-pill:empty { height: 34px; width: 160px; border-radius: 999px; box-shadow: none; }
+
+/* Dash's boot screen. Its markup is fixed (<div class="_dash-loading">Loading...</div>), so hide the text and
+   spin the box's own border rather than adding an element we would have to inject into index_string. */
+._dash-loading { margin: 42vh auto 0; width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%;
+                 font-size: 0; color: transparent;
+                 border: 3px solid var(--line); border-top-color: var(--blue);
+                 animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { ._dash-loading { animation: none; } }
+
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) { .mantine-Chip-label { transition: box-shadow .18s ease; } }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr !important; } }
